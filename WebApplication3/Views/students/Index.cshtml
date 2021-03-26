@@ -1,0 +1,222 @@
+﻿@model IEnumerable<WebApplication3.Models.Student>
+
+@{
+    ViewBag.Title = "Index";
+}
+
+<style>
+
+    .tableCss {
+        width: 100%;
+    }
+
+        .tableCss th {
+            padding-top: 12px;
+            padding-bottom: 12px;
+            text-align: left;
+            color:#797373;
+            background-color: #f2f2f2;
+        }
+
+        .tableCss td, .tableCss th {
+            border: 1px solid #ddd;
+            padding: 10px;
+        }
+
+
+    /*-------------------------------------------*/
+
+    #tableResult {
+        width: 100%;
+        border: 1px solid #ddd;
+    }
+
+        #tableResult th {
+            padding-top: 12px;
+            padding-bottom: 12px;
+            text-align: left;
+            color: #797373;
+            background-color: #f2f2f2;
+        }
+
+        #tableResult td, #tableResult th {
+            padding: 10px;
+        }
+    /*---------------------------------------*/
+    #tableResultData {
+        width: 100%;
+    }
+
+        #tableResultData th {
+            padding-top: 12px;
+            padding-bottom: 12px;
+            text-align: left;
+            color: white;
+            background-color: black;
+        }
+
+        #tableResultData tr:hover {
+            background-color: #c9c7c7;
+        }
+
+        #tableResultData td, #tableResultData th {
+            border-top: 1px solid #ddd;
+            padding: 10px;
+        }
+</style>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#tableMessge").hide();
+        $("#tableSelectedStudent").hide();
+    });
+
+</script>
+
+<h2>Student Registration System</h2>
+
+<p>
+    @Html.ActionLink("Create New Student", "Create")
+</p>
+
+<p>
+    @using (@Html.BeginForm())
+    {
+        <table id="tableSearch" class="tableCss">
+            <tr>
+                <th>Student Search</th>
+            </tr>
+            <tr>
+                <td> Student Name:  @Html.TextBox("search") <input id="btnSearch" type="submit" value="search" />   </td>
+            </tr>
+        </table>
+    }
+</p>
+
+
+<table id="tableResult">
+    <tr>
+        <th>Student Results</th>
+    </tr>
+    <tr>
+        <td>
+            @{ if (!Model.Any())
+                {
+                    <b style="color:orangered;">No students match your criteria. Please try again</b>
+                }
+                else
+                {
+                    <table id="tableResultData">
+                        <tr>
+                            <th>
+                                @Html.DisplayName("Name")
+                            </th>
+                            <th>
+                                @Html.DisplayName("Grade")
+                            </th>
+                            <th>
+                                @Html.DisplayName("GPA")
+                            </th>
+                            <th></th>
+                        </tr>
+
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.sname)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.syear)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.sgrade)
+                                </td>
+                                <td>
+                                    <input type="hidden" value="" id='h_v' class='h_v'>
+                                    <button type="button" class="btn submit" onclick="SelectedUser( @item.sid)">Select</button>
+                                </td>
+                            </tr>
+                        }
+                    </table>
+                }
+            }
+        </td>
+    </tr>
+</table>
+
+<p>
+    <table id="tableMessge" class="tableCss">
+        <tr>
+            <th>Message</th>
+        </tr>
+        <tr>
+            <td>
+                Are you able to sign up for course on the students behalf?
+                <br /><br />
+                @Html.RadioButton("Confirmed", "Yes") Yes
+                <br />
+                @Html.RadioButton("Confirmed", "No") No
+
+            </td>
+        </tr>
+    </table>
+
+   <div id="divStudentData"></div>
+</p>
+
+<input type="hidden" id="hiddenSId" name="hiddenSId" value="No" />
+<script>
+
+
+    $("#btnSearch").click(function () {
+        if ($('#search').val() == '') {
+            alert('Please Enter Student Name.');
+            $('#search').focus();
+            return false;
+        }
+    });
+
+    function SelectedUser(id) {
+        $("#hiddenSId").val(id)
+        $("#tableMessge").show();
+        $("#Confirmed").prop("checked", false);
+    };
+
+    $("#tableMessge input").click(function () {
+
+        if ($(this).val() == 'Yes')
+        {
+            //alert($("#hiddenSId").val());
+            $("#tableSelectedStudent").show();
+            //Get Student Data
+            $.ajax({
+                type: "POST",
+                url: "/Students/GetStudentCourses",
+                data: '{stuId: "' + $("#hiddenSId").val() + '" }',
+                contentType: "application/json; charset=utf-8",
+                dataType: "html",
+                success: function (response)
+                {
+                    $('#divStudentData').html(response);
+                },
+                failure: function (response) {
+                    alert(response.responseText);
+                },
+                error: function (response) {
+                    alert(response.responseText);
+                }
+            });
+
+        }
+        else
+        {
+            $("#tableMessge").hide();
+            $("#tableSelectedStudent").hide();
+        }
+    });
+
+
+</script>

@@ -1,0 +1,147 @@
+﻿
+
+@model WebApplication3.Models.Student
+
+<style>
+
+    .form-controlNew {
+        width: 13%;
+        height: 30px;
+        padding: 6px 6px;
+        font-size: 14px;
+        line-height: 1.42857143;
+        color: #555;
+        background-color: #fff;
+        background-image: none;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
+        box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
+        -webkit-transition: border-color ease-in-out .15s, -webkit-box-shadow ease-in-out .15s;
+        -o-transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+        transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+    }
+
+    .btnNew {
+        display: inline-block;
+        margin-bottom: 0;
+        font-size: 10px;
+        font-weight: bold;
+        line-height: 1.42857143;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: middle;
+        -ms-touch-action: manipulation;
+        touch-action: manipulation;
+        cursor: pointer;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        background-image: none;
+        border: 1px solid transparent;
+        border-radius: 2px;
+    }
+</style>
+
+<table id="tableSelectedStudent" class="tableCss">
+    <tr>
+        <th>Selected Student</th>
+    </tr>
+
+    <tr>
+        <td>
+            <b>Name:  </b>  @Html.DisplayFor(model => model.sname)<br />
+            <b>Grade: </b> @Html.DisplayFor(model => model.syear) <br />
+            <b>GPA:   </b> @Html.DisplayFor(model => model.sgrade)
+        </td>
+    </tr>
+
+
+    <tr>
+        <td>
+            Course: @Html.DropDownList("ddlStudentCoursesList", ViewBag.ddlStudentCoursesList as SelectList, "-- Select --", new { @class = "form-controlNew" })
+             <input id="btnAddStudentCourse" type="submit" class="btn submit" value="Add Course" />
+        </td>
+    </tr>
+
+    <tr>
+        <td>
+            <table id="tableSelectedCorsesList" class="tableCss">
+                <tr>
+                    <th>Courses For Student</th>
+                </tr>
+
+                <tr>
+                    <td>
+                        @foreach (var item in ViewBag.StdentCourseList)
+                        {
+                            <b>@item.CourseName</b> <input id="btnDeleteStudentCourse" type="submit" class="btnNew" onclick="deleteStudentCourse(@item.CourseId)" value="x" /><br/>
+                        }
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+
+
+<script>
+
+    $("#btnAddStudentCourse").click(function ()
+    {
+        var cid = $('#ddlStudentCoursesList').val()
+
+        if (cid =='') {
+            alert("Please Select Course");
+            $('#ddlStudentCoursesList').focus();
+
+            return false;
+        }
+        else {
+            $.ajax({
+                type: "POST",
+                url: "/Students/AddStudentCourse",
+                data: '{stuId: "' + $("#hiddenSId").val() + '",couId: "' + cid + '"  }',
+                contentType: "application/json; charset=utf-8",
+                dataType: "html",
+                success: function (response) {
+                    $('#divStudentData').html(response);
+                },
+                failure: function (response) {
+                    alert(response.responseText);
+                },
+                error: function (response) {
+                    alert(response.responseText);
+                }
+            });
+        }
+
+    });
+
+
+    function deleteStudentCourse(id)
+    {
+        $.ajax({
+            type: "POST",
+            url: "/Students/DeleteStudentCourse",
+            data: '{stuId: "' + $("#hiddenSId").val() + '",couId: "' + id + '"  }',
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            success: function (response) {
+                $('#divStudentData').html(response);
+            },
+            failure: function (response) {
+                alert(response.responseText);
+            },
+            error: function (response) {
+                alert(response.responseText);
+            }
+        });
+    };
+
+
+
+</script>
+
+
